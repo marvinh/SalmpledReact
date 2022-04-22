@@ -1,50 +1,59 @@
-import React, { Component } from "react"
-import logo from "./logo.svg"
-import "./App.css"
+import React from "react";
+import { BrowserRouter as Router, Route, Routes, useNavigate } from 'react-router-dom'
+import { Container } from "react-bootstrap";
 
-class LambdaDemo extends Component {
-  constructor(props) {
-    super(props)
-    this.state = { loading: false, msg: null }
+import Loading from "./components/Loading";
+import NavBar from "./components/NavBar";
+import Home from "./views/Home";
+import Dashboard from "./views/Dashboard";
+import ExternalApi from "./views/ExternalApi";
+import { useAuth0 } from "@auth0/auth0-react";
+import history from "./utils/history";
+import CreateNewPack from "./views/CreateNewPack";
+import EditPack from "./views/EditPack";
+import Invite from "./views/Invite";
+
+// styles
+import "./App.css";
+import 'bootstrap/dist/css/bootstrap.min.css';
+// fontawesome
+import initFontAwesome from "./utils/initFontAwesome";
+import { PackHistory } from "./views/PackHistory";
+initFontAwesome();
+
+const App = () => {
+  const { isLoading, error } = useAuth0();
+
+  
+
+  if (error) {
+    return <div>Oops... {error.message}</div>;
   }
 
-  handleClick = api => e => {
-    e.preventDefault()
-
-    this.setState({ loading: true })
-    fetch("/.netlify/functions/" + api)
-      .then(response => response.json())
-      .then(json => this.setState({ loading: false, msg: json.msg }))
+  if (isLoading) {
+    return <Loading />;
   }
 
-  render() {
-    const { loading, msg } = this.state
+  
 
-    return (
-      <p>
-        <button onClick={this.handleClick("hello")}>{loading ? "Loading..." : "Call Lambda"}</button>
-        <button onClick={this.handleClick("async-dadjoke")}>{loading ? "Loading..." : "Call Async Lambda"}</button>
-        <br />
-        <span>{msg}</span>
-      </p>
-    )
-  }
-}
-
-class App extends Component {
-  render() {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <LambdaDemo />
-        </header>
+  return (
+    <Router history={history}>
+      <div id="app" className="bg-dark min-vh-100">
+        <NavBar />
+        <Container fluid>
+          <Routes>
+            <Route path="/" exact element={<Home/>} />
+            <Route path="/dashboard" exact element={<Dashboard/>} />
+            <Route path="/external-api" exact element={<ExternalApi/>} />
+            <Route path="/newpack" exact element={<CreateNewPack/>} />
+            <Route path="/edit/:username/:pack" exact element={<EditPack/>} />
+            <Route path="/history/:username/:pack" exact element={<PackHistory/>} />
+            <Route path="/invite/:username/:pack" exact element={<Invite/>} />
+          </Routes>
+        </Container>
       </div>
-    )
-  }
-}
+    </Router>
+  );
+};
 
-export default App
+export default App;
